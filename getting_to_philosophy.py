@@ -1,5 +1,4 @@
 import re
-import datrie
 import string
 import sys
 from urllib2 import urlopen
@@ -23,8 +22,7 @@ class WikipediaArticle(object):
 
   def print_path_to(self, max_hops, navigate_url):
     # Make sure we don't get in a loop
-    # Use a trie to save some space
-    visited_trie   = datrie.Trie(string.printable)
+    visited        = {}
     number_of_hops = 0
 
     # /wiki/SomeArticle => http://en.wikipedia.org/wiki/SomeArticle
@@ -32,7 +30,7 @@ class WikipediaArticle(object):
       return self.__WIKIPEDIA_PREFIX + short_form
 
     # Loops from the start node until it finds a valid Wikipedia article
-    def get_next_wikipedia_link(start, visited_trie):
+    def get_next_wikipedia_link(start, visited):
       current_p_tag = start
       while True:
         if current_p_tag is None:
@@ -44,7 +42,8 @@ class WikipediaArticle(object):
         next_link_item = current_p_tag.find('a', href=re.compile("^/wiki/[^:]+$"))
         if next_link_item != None:
           next_link = construct_link_from_shortform(next_link_item['href'])
-          if not next_link in visited_trie:
+          article = WikipediaArticle(next_link)
+          if not next_link in visited.keys() and article.is_valid_article():
             return next_link
 
     next_link           = self.start_link
@@ -58,9 +57,9 @@ class WikipediaArticle(object):
         # The node that we're going to continuously query from
         start_tag = soup.find('div', id='mw-content-text')
 
-        next_link = get_next_wikipedia_link(start_tag, visited_trie)
+        next_link = get_next_wikipedia_link(start_tag, visited)
         if (next_link):
-          visited_trie[unicode(next_link)] = True
+          visited[next_link] = True
           number_of_hops += 1
         else:
           print "Could not reach Philosophy from the starting node"
@@ -72,6 +71,8 @@ if len(sys.argv) < 2:
   print "You need to supply the starting URL"
 else:
   t = WikipediaArticle(sys.argv[1])
-  if t.is_valid_article:
+  if t.is_valid_article():
     print "Getting path to Philosophy from " + sys.argv[1]
     t.print_path_to(MAX_HOPS, "Philosophy")
+  else:
+    print "Invalid Wikipedia article!"
