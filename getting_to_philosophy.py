@@ -36,13 +36,13 @@ class WikipediaArticle(object):
         if current_p_tag is None:
           print "Could not find path to Philosophy"
           return None
-        current_p_tag = current_p_tag.find_next('p')
+        current_p_tag  = current_p_tag.find_next('p')
         # Wikipedia article links are in the form /wiki/ArticleName
         # where there's no namespace (i.e. no colon in the article name)
         next_link_item = current_p_tag.find('a', href=re.compile("^/wiki/[^:]+$"))
         if next_link_item != None:
           next_link = construct_link_from_shortform(next_link_item['href'])
-          article = WikipediaArticle(next_link)
+          article   = WikipediaArticle(next_link)
           if not next_link in visited.keys() and article.is_valid_article():
             return next_link
 
@@ -54,13 +54,13 @@ class WikipediaArticle(object):
         break
       with closing(urlopen(next_link)) as f:
         soup = BeautifulSoup(f)
-        # The node that we're going to continuously query from
-        start_tag = soup.find('div', id='mw-content-text')
 
+        start_tag = soup.find('div', id='mw-content-text')
         next_link = get_next_wikipedia_link(start_tag, visited)
+
         if (next_link):
           visited[next_link] = True
-          number_of_hops += 1
+          number_of_hops     += 1
         else:
           print "Could not reach Philosophy from the starting node"
           return None
