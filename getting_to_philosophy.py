@@ -22,7 +22,6 @@ class WikipediaArticle(object):
   def print_path_to(self, max_hops, navigate_url):
     # Make sure we don't get in a loop
     visited        = {}
-    number_of_hops = 0
 
     # /wiki/SomeArticle => http://en.wikipedia.org/wiki/SomeArticle
     def construct_link_from_shortform(short_form):
@@ -32,9 +31,7 @@ class WikipediaArticle(object):
     def get_next_wikipedia_link(start, visited):
       current_p_tag = start
       while True:
-        if current_p_tag is None:
-          print "Could not find path to Philosophy"
-          return None
+        if current_p_tag is None: return None
         current_p_tag  = current_p_tag.find_next('p')
         # Wikipedia article links are in the form /wiki/ArticleName
         # where there's no namespace (i.e. no colon in the article name)
@@ -47,7 +44,8 @@ class WikipediaArticle(object):
 
     next_link           = self.start_link
     destination_article = construct_link_from_shortform("/wiki/" + navigate_url)
-    for x in range(max_hops):
+
+    for hop in range(max_hops):
       print next_link
       if next_link == destination_article:
         break
@@ -59,11 +57,10 @@ class WikipediaArticle(object):
 
         if next_link:
           visited[next_link] = True
-          number_of_hops     += 1
         else:
-          print "Could not reach Philosophy from the starting node"
+          print "Could not reach %s from the starting node" % destination_article
           return None
-    print str(number_of_hops) + " hops"
+    print str(hop) + " hops"
     return None
 
 if len(sys.argv) < 2:
@@ -71,7 +68,7 @@ if len(sys.argv) < 2:
 else:
   t = WikipediaArticle(sys.argv[1])
   if t.is_valid_article():
-    print "Getting path to Philosophy from " + sys.argv[1]
+    print "Getting path to Philosophy from %s" % sys.argv[1]
     t.print_path_to(MAX_HOPS, "Philosophy")
   else:
     print "Invalid Wikipedia article!"
