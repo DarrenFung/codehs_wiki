@@ -57,7 +57,7 @@ class WikipediaArticle(object):
         start_tag = soup.find('div', id='mw-content-text')
         next_link = get_next_wikipedia_link(start_tag, visited)
 
-        if (next_link):
+        if next_link:
           visited[next_link] = True
           number_of_hops     += 1
         else:
