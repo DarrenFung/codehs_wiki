@@ -47,7 +47,7 @@ class WikipediaArticle(object):
 
     next_link           = self.start_link
     destination_article = construct_link_from_shortform("/wiki/" + navigate_url)
-    for x in range(0, max_hops):
+    for x in range(max_hops):
       print next_link
       if next_link == destination_article:
         break
